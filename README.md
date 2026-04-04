@@ -116,6 +116,8 @@ Stopped Instances: ['i-1234567890']
 Started Instances: ['i-0987654321']
 ```
 
+<img width="1908" height="322" alt="ec2 execution" src="https://github.com/user-attachments/assets/d7ec6262-6fb2-4462-9d0c-df0221784f39" />
+
 ---
 
 ## Common Issues & Fixes
