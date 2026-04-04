@@ -7,7 +7,6 @@ VOLUME_ID = 'vol-0da6698869ef41c53'
 
 def lambda_handler(event, context):
     
-    # Create snapshot
     description = f"Automated snapshot - {datetime.now(timezone.utc)}"
     
     snapshot = ec2.create_snapshot(
@@ -18,7 +17,6 @@ def lambda_handler(event, context):
     snapshot_id = snapshot['SnapshotId']
     print(f"Created Snapshot: {snapshot_id}")
     
-    # Cleanup old snapshots
     threshold_date = datetime.now(timezone.utc) - timedelta(minutes=5)
     
     response = ec2.describe_snapshots(
@@ -33,10 +31,7 @@ def lambda_handler(event, context):
         start_time = snap['StartTime']
         
         print(f"Checking: {snap_id}, Time: {start_time}")
-        
-        # Optional safety filter (recommended)
-        # if "Automated snapshot" in snap.get('Description', ''):
-        
+       
         if start_time < threshold_date:
             print(f"Deleting: {snap_id}")
             
