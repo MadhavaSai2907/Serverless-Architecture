@@ -12,7 +12,7 @@ The Lambda function scans EC2 instances and performs actions based on a predefin
 * `Auto-Stop` → Stops the instance
 * `Auto-Start` → Starts the instance
 
---
+---
 
 ## Architecture
 
