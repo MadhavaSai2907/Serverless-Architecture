@@ -65,7 +65,7 @@ Create two instances:
 Attach the following policies:
 
 * `AmazonEC2FullAccess`
-* `AWSLambdaBasicExecutionRole`  *(required for logging)*
+* `AWSLambdaBasicExecutionRole` 
 
 <img width="1883" height="711" alt="IAM role" src="https://github.com/user-attachments/assets/e94c999a-6740-45c6-b8fe-42d4e78cbab6" />
 
@@ -184,7 +184,7 @@ Logs → CloudWatch
 Attach the following policies:
 
 * `AmazonS3FullAccess`
-* `AWSLambdaBasicExecutionRole`  *(required for logging)*
+* `AWSLambdaBasicExecutionRole`  
 
 <img width="1918" height="732" alt="role" src="https://github.com/user-attachments/assets/07dab355-827c-4259-9ec9-b82a5a5ac309" />
 
@@ -254,3 +254,160 @@ via **CloudWatch Logs**
 | Only partial files processed | API limit (1000 objects)       | Use paginator                           |
 
 ---
+
+# Task-3 Automated EBS Snapshot & Cleanup using AWS Lambda and Boto3
+
+## Overview
+
+This project automates the **backup and lifecycle management of EBS volumes** using **AWS Lambda** and **Boto3**.
+
+It performs two key operations:
+
+* Creates snapshots of specified EBS volumes
+* Deletes snapshots older than a defined retention period (e.g., 30 days)
+
+---
+
+##  Architecture
+
+```text
+AWS Lambda (Python + Boto3)
+        ↓
+Create Snapshot (EBS Volume)
+        ↓
+List Existing Snapshots
+        ↓
+Delete Old Snapshots (Retention Policy)
+        ↓
+Logs → CloudWatch
+```
+
+---
+
+##  Services Used
+
+* Amazon EC2
+* AWS Lambda
+* AWS Identity and Access Management
+* Amazon CloudWatch
+* Amazon EventBridge
+* Boto3
+
+---
+
+##  Setup Instructions
+
+###  Create / Identify EBS Volume
+
+* Navigate to EC2 → Volumes
+* Create or select an existing volume
+* Copy the **Volume ID** (my volume - vol-0da6698869ef41c53)
+
+<img width="1892" height="687" alt="image" src="https://github.com/user-attachments/assets/eb78bda2-4130-49d5-a47a-1d7a789c8b90" />
+
+---
+
+### Create IAM Role for Lambda
+
+Attach the following policies:
+
+* `AmazonEC2FullAccess`
+* `AWSLambdaBasicExecutionRole`
+
+<img width="1900" height="731" alt="image" src="https://github.com/user-attachments/assets/22813025-1d57-41c7-98b0-7d936ca48568" />
+
+---
+
+### Create Lambda Function
+* Create Lambda Fucntion (my lambda function - ebs-snapshot-manager)
+* Runtime: Python 3.x
+* Assign IAM role created above
+
+<img width="1847" height="736" alt="image" src="https://github.com/user-attachments/assets/2b5f001f-1726-4462-9cb9-d4ca80adbec9" />
+
+---
+
+## Lambda Code
+
+Attached in `EBS snapshot and cleanup.py` file
+
+**Note:** For testing purpose i have taken time as 5 minutes. Only condition replaced is ```timedelta(days=30)``` with ``` timedelta(minutes=5) ```
+
+---
+
+## Execution Steps
+
+1. Deploy the Lambda function
+2. Click **Test** to invoke manually
+3. Navigate to EC2 → Snapshots
+4. Verify:
+
+   * New snapshot created 
+   * Old snapshots deleted
+   
+# old Snapshot
+<img width="1915" height="467" alt="snapshot_new" src="https://github.com/user-attachments/assets/fd47d260-682a-45db-ace6-27f355387cba" />
+
+# New Snapshot
+<img width="1918" height="250" alt="created_snapshot" src="https://github.com/user-attachments/assets/10538c04-0976-4932-94b4-4429d7e54299" />
+
+---
+
+## Logs & Monitoring
+
+Logs available in:
+
+```text
+/aws/lambda/ebs-snapshot-manager
+```
+
+via **CloudWatch Logs**
+
+---
+
+##  Sample Output
+
+```text
+Created Snapshot: snap-0842b772694a284d7
+Deleted Snapshots: ['snap-078177fb5f6e20fb6']
+```
+
+<img width="1907" height="655" alt="image" src="https://github.com/user-attachments/assets/1adf0c16-4d1d-49f4-b13b-02f80f4dfc02" />
+
+---
+
+## Scheduling
+
+* Now we have to run this function every week. So we are using EventBridge to create Cron Job for weekly execution of this Function
+  To create EventBride 
+  - Go to EventBride click on **Schedules**
+  - Fill the schedule details and select Schedule pattern (Recurring schedule in our case)
+  - Select Cron or Rate based Schedule (Cron Schedule in our case). Click Next.
+  - Select Target (Lambda function). Select Lambda function to invoke.
+  - COnfigure if any settings and review details and click on create Schedule. 
+  
+Automate using **EventBridge**:
+
+# Weekly execution
+
+```text
+cron(0 2 ? * SUN *)
+```
+
+<img width="1901" height="802" alt="image" src="https://github.com/user-attachments/assets/de3eb9fb-6f49-47a1-9fdb-3df834a2ea48" />
+
+---
+
+
+##  Common Issues & Fixes
+
+| Issue                 | Cause               | Fix                            |
+| --------------------- | ------------------- | ------------------------------ |
+| Snapshot not deleted  | Used by AMI         | Deregister AMI or skip in code |
+| Access denied         | Missing permissions | Attach EC2 + Lambda role       |
+| No snapshots found    | Region mismatch     | Use same region                |
+| All snapshots deleted | No filter           | Add description/tag filter     |
+
+---
+
+
