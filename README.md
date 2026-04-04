@@ -1,6 +1,6 @@
 # Serverless-Architecture
 Assignment on Serverless Architecture using Lambda functions, Boto3, etc.
-
+---
 # Task-1 Automated EC2 Instance Management using AWS Lambda & Boto3
 
 ## Overview
