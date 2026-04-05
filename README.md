@@ -536,3 +536,133 @@ Logs are available in:
 
 
 
+# Assignment 14: EC2 State Change Monitoring using AWS Lambda, SNS & EventBridge
+
+##  Overview
+
+This project implements a **real-time monitoring system** for EC2 instance state changes using **event-driven architecture**.
+
+Whenever an EC2 instance is:
+
+* Started
+* Stopped
+
+An automatic notification is sent via **Amazon SNS**.
+
+---
+
+##  Architecture
+
+```
+EC2 Instance (Start/Stop)
+        ↓
+EventBridge (captures state change event)
+        ↓
+AWS Lambda (process event)
+        ↓
+SNS Topic (send notification)
+        ↓
+Email Alert
+```
+
+---
+
+## Services Used
+
+* Amazon EC2
+* AWS Lambda
+* Amazon SNS
+* Amazon EventBridge
+* AWS Identity and Access Management
+* Amazon CloudWatch
+
+---
+
+## Setup Instructions
+
+###  Create SNS Topic
+
+* Create a topic (e.g., `ec2-state-alerts`)
+* Add email subscription
+* Confirm subscription via email
+
+<img width="1629" height="498" alt="image" src="https://github.com/user-attachments/assets/0d19e572-3c77-4661-bd7a-02861c125f9d" />
+
+<img width="1620" height="603" alt="image" src="https://github.com/user-attachments/assets/eadb62d1-49e6-4460-a789-4772d1676489" />
+
+---
+
+###  Create IAM Role for Lambda
+
+* Create Role (My role - Lambda-EC2-State-Alert-Role)
+* Attach the following policies:
+
+* `AmazonEC2ReadOnlyAccess`
+* `AmazonSNSFullAccess`
+* `AWSLambdaBasicExecutionRole`
+
+---
+
+### Create Lambda Function
+
+* Create Lambda FUnction (my function - ec2-state-change-alert)
+* Runtime: Python 3.x
+* Assign IAM role created above
+
+---
+
+## Lambda Code
+
+Attached in `EC2-SNS-Lambda-EventBridge.py` file
+
+---
+
+## EventBridge Rule Configuration
+
+### Event Pattern
+
+* Rule Name - ec2-state-change-rule
+
+```
+{
+  "source": ["aws.ec2"],
+  "detail-type": ["EC2 Instance State-change Notification"]
+}
+```
+
+<img width="1613" height="555" alt="image" src="https://github.com/user-attachments/assets/eda83fe3-7e0b-4fa6-bd9d-26afbb45d0bd" />
+
+
+---
+
+## Execution Steps
+
+1. Deploy Lambda function
+2. Create EventBridge rule with EC2 state change event
+3. Start or stop an EC2 instance
+4. Verify:
+
+   * Lambda is triggered
+   * SNS email is received
+
+---
+
+
+## Sample Output
+
+<img width="1535" height="279" alt="image" src="https://github.com/user-attachments/assets/b316907a-e105-431c-8b39-6326a4aa332a" />
+
+---
+
+## Common Issues & Fixes
+
+| Issue                    | Cause                      | Fix                          |
+| ------------------------ | -------------------------- | ---------------------------- |
+| No email received        | Subscription not confirmed | Confirm email from SNS       |
+| Lambda not triggered     | Wrong event pattern        | Verify EventBridge rule      |
+| Missing instance details | Incorrect event parsing    | Use `event['detail']`        |
+| Access denied            | Missing permissions        | Attach required IAM policies |
+
+---
+
+
