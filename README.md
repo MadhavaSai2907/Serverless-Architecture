@@ -3,7 +3,7 @@ Assignment on Serverless Architecture using Lambda functions, Boto3, etc.
 
 #
 
-# Task-1 Automated EC2 Instance Management using AWS Lambda & Boto3
+# Assignment 1: Automated EC2 Instance Management using AWS Lambda & Boto3
 
 ## Overview
 
@@ -129,7 +129,7 @@ Logs are available in:
 ---
 
 
-# Task-2 Automated S3 Bucket Cleanup using AWS Lambda & Boto3
+# Assignment 2: Automated S3 Bucket Cleanup using AWS Lambda & Boto3
 
 ## Overview
 
@@ -255,7 +255,7 @@ via **CloudWatch Logs**
 
 ---
 
-# Task-3 Automated EBS Snapshot & Cleanup using AWS Lambda and Boto3
+# Assignment 4: Automated EBS Snapshot & Cleanup using AWS Lambda and Boto3
 
 ## Overview
 
@@ -409,5 +409,130 @@ cron(0 2 ? * SUN *)
 | All snapshots deleted | No filter           | Add description/tag filter     |
 
 ---
+
+Here’s a clean, professional **README.md** for your **S3 → Glacier Archival (Assignment 9)**.
+
+---
+
+# Assignment-9: Archive Old Files from S3 to Glacier Using AWS Lambda and Boto3
+
+## Overview
+
+This project automates the archival of old files in an S3 bucket by transitioning them to **Glacier storage class**, enabling **cost optimization** for infrequently accessed data.
+
+The Lambda function:
+
+* Scans S3 bucket objects
+* Identifies files older than 6 months
+* Changes their storage class to **GLACIER**
+* Logs archived files
+
+---
+
+## Architecture
+
+```
+AWS Lambda (Python + Boto3)
+        ↓
+List S3 Objects
+        ↓
+Check LastModified Timestamp
+        ↓
+Change Storage Class → GLACIER
+        ↓
+Logs → CloudWatch
+```
+
+---
+
+##  Services Used
+
+* Amazon S3
+* AWS Lambda
+* AWS Identity and Access Management
+* Amazon CloudWatch
+* Amazon EventBridge
+* Boto3
+
+---
+
+## Setup Instructions
+
+###  Create S3 Bucket
+
+* Create a new bucket (my s3-glacier-task) 
+* Upload files (mix of old and new for testing)
+
+<img width="1883" height="621" alt="s3 files" src="https://github.com/user-attachments/assets/013dfd3a-afd1-4208-878c-f4f1a63f37db" />
+
+---
+
+### Create IAM Role for Lambda
+
+* Cretae a IAM policy (my s3-glacier-lambda)
+Attach the following policies:
+
+* `AmazonS3FullAccess`
+
+---
+
+### Create Lambda Function
+
+* Create a Lambda function (my function - s3-glacier-function)
+* Runtime: Python 3.x
+* Assign IAM role created above
+
+---
+
+## Lambda Code
+
+Attached in `s3-glacier files.py` file
+
+**Note:** For testing purpose i have taken time as 5 minutes. Only condition replaced is ```timedelta(days=30)``` with ``` timedelta(minutes=5) ```
+
+---
+
+## Execution Steps
+
+1. Deploy the Lambda function
+2. Click **Test** to invoke manually
+3. Navigate to S3 bucket
+4. Verify:
+
+   * Old files → moved to **GLACIER**
+   * New files → remain unchanged
+
+---
+
+## Logs & Monitoring
+
+Logs are available in:
+
+```
+/aws/lambda/s3-glacier function
+```
+<img width="1621" height="521" alt="logs" src="https://github.com/user-attachments/assets/96462b14-d93a-424f-84a6-8e89d0e05e05" />
+
+
+---
+
+##  Sample Output
+
+<img width="1683" height="402" alt="s3  files - glacier" src="https://github.com/user-attachments/assets/08437fb8-461e-4cd6-a31a-f810727a2ebd" />
+
+
+---
+
+## Common Issues & Fixes
+
+| Issue                              | Cause                          | Fix                            |
+| ---------------------------------- | ------------------------------ | ------------------------------ |
+| No files archived                  | Files not older than threshold | Reduce time for testing        |
+| Files overwritten incorrectly      | Missing metadata directive     | Use `MetadataDirective='COPY'` |
+| Only partial files processed       | API limit (1000 objects)       | Use paginator                  |
+| Already archived files reprocessed | Missing storage class check    | Skip GLACIER files             |
+
+---
+
 
 
